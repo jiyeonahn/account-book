@@ -2,14 +2,12 @@ services:
   my-db:
     container_name: my-db
     image: postgres
-    restart: always
     ports:
       - "5432:5432"
     environment:
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: account_book
+      PGDATA: "/var/lib/postgresql/data/pgdata"
     volumes:
-      - ./db/postgresql/conf.d:/etc/postgresql/conf.d
-      - ./db/postgresql:/var/lib/postgresql
-      - ./db/postgresql/initdb.d:/docker-entrypoint-initdb.d
+      - "./pgdata:/var/lib/postgresql/data"
