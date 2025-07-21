@@ -1,7 +1,5 @@
 package com.devji.account_book.auth.controller;
 
-import com.devji.account_book.auth.dto.JwtResponse;
-import com.devji.account_book.auth.dto.LoginRequest;
 import com.devji.account_book.auth.dto.MessageResponse;
 import com.devji.account_book.auth.dto.SignupRequest;
 import com.devji.account_book.auth.service.AuthService;
