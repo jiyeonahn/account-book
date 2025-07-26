@@ -16,12 +16,15 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
 @Configuration
 @EnableWebSecurity(debug = false)
 @EnableMethodSecurity(prePostEnabled = true)
 @RequiredArgsConstructor
 public class SecurityConfig {
 
+    private final UrlBasedCorsConfigurationSource urlBasedCorsConfigurationSource;
     private final JwtUtil jwtUtil;
     private final AuthenticationConfiguration authenticationConfiguration;
 
@@ -58,6 +61,7 @@ public class SecurityConfig {
 
         // 경로별 인가 작업
         http
+                .cors(cors -> cors.configurationSource(urlBasedCorsConfigurationSource))
                 .authorizeHttpRequests((authorizeHttpRequests) -> authorizeHttpRequests
                         .requestMatchers("/api/auth/**").permitAll()
                         .anyRequest().authenticated() // 그 외 모든 요청 인증처리
