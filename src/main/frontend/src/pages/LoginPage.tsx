@@ -1,11 +1,13 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import { DollarSign, Eye, EyeOff, Mail, Lock, User, Phone } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 interface AuthScreensProps {
     setIsAuthenticated: (auth: boolean) => void;
 }
 
 const AuthScreens: React.FC<AuthScreensProps> = ({ setIsAuthenticated }) => {
+    const navigate = useNavigate();
     const [currentScreen, setCurrentScreen] = useState('login');
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -34,7 +36,7 @@ const AuthScreens: React.FC<AuthScreensProps> = ({ setIsAuthenticated }) => {
 
         setIsLoading(true);
         try {
-            await fetch('http://localhost:8080/api/auth/login', {
+            const response = await fetch('http://localhost:8080/api/auth/login', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -45,14 +47,18 @@ const AuthScreens: React.FC<AuthScreensProps> = ({ setIsAuthenticated }) => {
                 })
             });
 
-            // if (response.ok) {
-            //     const data = await response.json();
-            //     console.log('로그인 성공:', data);
-            //     setIsAuthenticated(true);
-            // } else {
-            //     const errorData = await response.json();
-            //     alert(errorData.message || '로그인에 실패했습니다.');
-            // }
+            if (response.ok) {
+                console.log('로그인 성공:', response.headers.get("token"));
+                setIsAuthenticated(true);
+                const accessToken:string|null = response.headers.get("token");
+                if(accessToken != null){
+                    localStorage.setItem("accessToken", accessToken);
+                }
+                navigate("/main")
+            } else {
+                const errorData = await response.json();
+                alert(errorData.message || '로그인에 실패했습니다.');
+            }
         } catch (error) {
             console.error('로그인 오류:', error);
             alert('네트워크 오류가 발생했습니다.');
