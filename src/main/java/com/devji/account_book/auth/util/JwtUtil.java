@@ -2,6 +2,8 @@ package com.devji.account_book.auth.util;
 
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
+import io.jsonwebtoken.security.SecurityException;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -12,10 +14,16 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
+import org.springframework.util.StringUtils;
 
 @Component
 @Slf4j
 public class JwtUtil {
+    // Header KEY 값
+    public static final String AUTHORIZATION_HEADER = "Authorization";
+
+    // Token 식별자
+    public static final String BEARER_PREFIX = "Bearer ";
     
     @Value("${jwt.secret}")
     private String secret;
@@ -54,6 +62,7 @@ public class JwtUtil {
     
     public String createToken(String email) {
         return Jwts.builder()
+                .setSubject(email)
                 .claim("email",email)
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + expiration))
@@ -78,4 +87,14 @@ public class JwtUtil {
             return false;
         }
     }
+
+    // Header에서 Access Token 가져오기
+    public String getAccessTokenFromHeader(HttpServletRequest request) {
+        String bearerToken = request.getHeader(AUTHORIZATION_HEADER);
+        if (StringUtils.hasText(bearerToken) && bearerToken.startsWith(BEARER_PREFIX)) {
+            return bearerToken.substring(7).trim(); // 순수한 토큰 가져오기 위해 substring(BEARER 자름)
+        }
+        return null;
+    }
+
 }

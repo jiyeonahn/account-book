@@ -1,7 +1,7 @@
 package com.devji.account_book.auth.security;
 
-import com.devji.account_book.entity.User;
-import com.devji.account_book.repository.UserRepository;
+import com.devji.account_book.auth.entity.User;
+import com.devji.account_book.auth.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -23,7 +23,7 @@ public class PrincipalDetailsService implements UserDetailsService {
     // user정보를 확인하고 UserDetailsImpl 생성자로 보내서 UserDetailsImpl을 반환
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        User user = userRepository.findByEmail(email).orElseThrow();
+        User user = userRepository.findByEmail(email).orElseThrow(()->new UsernameNotFoundException("사용자 정보를 찾을 수 없습니다"));
         return new PrincipalDetails(user);
     }
 }

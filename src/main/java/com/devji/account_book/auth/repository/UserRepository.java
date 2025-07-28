@@ -1,6 +1,6 @@
-package com.devji.account_book.repository;
+package com.devji.account_book.auth.repository;
 
-import com.devji.account_book.entity.User;
+import com.devji.account_book.auth.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

@@ -1,6 +1,9 @@
 package com.devji.account_book.auth.config;
 
 import com.devji.account_book.auth.filter.JwtAuthenticationFilter;
+import com.devji.account_book.auth.filter.JwtAuthorizationFilter;
+import com.devji.account_book.auth.security.PrincipalDetails;
+import com.devji.account_book.auth.security.PrincipalDetailsService;
 import com.devji.account_book.auth.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -16,6 +19,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.authentication.logout.LogoutFilter;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 @Configuration
@@ -24,6 +28,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
+    private final PrincipalDetailsService principalDetails;
     private final UrlBasedCorsConfigurationSource urlBasedCorsConfigurationSource;
     private final JwtUtil jwtUtil;
     private final AuthenticationConfiguration authenticationConfiguration;
@@ -41,10 +46,10 @@ public class SecurityConfig {
         return filter;
     }
 
-//    @Bean
-//    public JwtAuthorizationFilter jwtAuthorizationFilter() {
-//        return new JwtAuthorizationFilter(jwtUtil, userDetailsService);
-//    }
+    @Bean
+    public JwtAuthorizationFilter jwtAuthorizationFilter() {
+        return new JwtAuthorizationFilter(jwtUtil, principalDetails);
+    }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -73,7 +78,7 @@ public class SecurityConfig {
         http.addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
 
         // 인가 필터 => 인증된 사용자에 대한 자원 접근 권한 확인
-        //http.addFilterBefore(jwtAuthorizationFilter(), JwtAuthenticationFilter.class);
+        http.addFilterBefore(jwtAuthorizationFilter(), JwtAuthenticationFilter.class);
         //http.addFilterBefore(jwtLogoutFilter(), LogoutFilter.class);
 
         // 기본 설정인 Session 방식은 사용하지 않고 JWT 방식을 사용하기 위한 설정

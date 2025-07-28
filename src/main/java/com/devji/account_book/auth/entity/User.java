@@ -1,4 +1,4 @@
-package com.devji.account_book.entity;
+package com.devji.account_book.auth.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

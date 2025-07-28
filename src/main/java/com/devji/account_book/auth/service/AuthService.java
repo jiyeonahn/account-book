@@ -2,18 +2,12 @@ package com.devji.account_book.auth.service;
 
 
 import com.devji.account_book.auth.dto.SignupRequest;
-import com.devji.account_book.auth.util.JwtUtil;
-import com.devji.account_book.entity.User;
-import com.devji.account_book.repository.UserRepository;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
+import com.devji.account_book.auth.entity.User;
+import com.devji.account_book.auth.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
-import java.util.Date;
 
 
 @Slf4j(topic = "Auth Service")

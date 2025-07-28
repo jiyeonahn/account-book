@@ -1,7 +1,7 @@
 package com.devji.account_book.auth.security;
 
-import com.devji.account_book.entity.Role;
-import com.devji.account_book.entity.User;
+import com.devji.account_book.auth.entity.Role;
+import com.devji.account_book.auth.entity.User;
 import java.util.Collection;
 import java.util.Collections;
 import lombok.Getter;
