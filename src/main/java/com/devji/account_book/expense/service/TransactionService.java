@@ -44,23 +44,22 @@ public class TransactionService {
         return convertToDto(saved);
     }
     
-//    // 거래 수정
-//    public TransactionDto updateTransaction(Long id, TransactionDto transactionDto) {
-//        String userId = getCurrentUserId();
-//        log.info("Updating transaction {} for user: {}", id, userId);
-//
-//        Transaction transaction = transactionRepository.findByIdAndUserId(id, userId)
-//                .orElseThrow(() -> new RuntimeException("거래를 찾을 수 없습니다."));
-//
-//        transaction.setType(transactionDto.getType());
-//        transaction.setCategory(transactionDto.getCategory());
-//        transaction.setAmount(transactionDto.getAmount());
-//        transaction.setDescription(transactionDto.getDescription());
-//        transaction.setTransactionDate(transactionDto.getTransactionDate());
-//
-//        Transaction updated = transactionRepository.save(transaction);
-//        return convertToDto(updated);
-//    }
+    // 거래 수정
+    public TransactionDto updateTransaction(long userId, Long id, TransactionDto transactionDto) {
+        log.info("Updating transaction {} for user: {}", id, userId);
+
+        Transaction transaction = transactionRepository.findByIdAndUserId(id, userId)
+                .orElseThrow(() -> new RuntimeException("거래를 찾을 수 없습니다."));
+
+        transaction.setType(transactionDto.getType());
+        transaction.setCategory(transactionDto.getCategory());
+        transaction.setAmount(transactionDto.getAmount());
+        transaction.setDescription(transactionDto.getDescription());
+        transaction.setTransactionDate(transactionDto.getTransactionDate());
+
+        Transaction updated = transactionRepository.save(transaction);
+        return convertToDto(updated);
+    }
 //
 //    // 거래 삭제
 //    public void deleteTransaction(Long id) {

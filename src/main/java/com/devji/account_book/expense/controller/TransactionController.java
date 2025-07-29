@@ -35,15 +35,16 @@ public class TransactionController {
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
     
-//    // 거래 수정
-//    @PutMapping("/{id}")
-//    public ResponseEntity<TransactionDto> updateTransaction(
-//            @PathVariable Long id,
-//            @Valid @RequestBody TransactionDto transactionDto) {
-//        log.info("Updating transaction {}: {}", id, transactionDto);
-//        TransactionDto updated = transactionService.updateTransaction(id, transactionDto);
-//        return ResponseEntity.ok(updated);
-//    }
+    // 거래 수정
+    @PutMapping("/{id}")
+    public ResponseEntity<TransactionDto> updateTransaction(
+            @AuthenticationPrincipal PrincipalDetails principalDetails,
+            @PathVariable Long id,
+            @Valid @RequestBody TransactionDto transactionDto) {
+        log.info("Updating transaction {}: {}", id, transactionDto);
+        TransactionDto updated = transactionService.updateTransaction(principalDetails.getUser().getId(), id, transactionDto);
+        return ResponseEntity.ok(updated);
+    }
 //
 //    // 거래 삭제
 //    @DeleteMapping("/{id}")

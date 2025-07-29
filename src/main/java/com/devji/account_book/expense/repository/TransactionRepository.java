@@ -20,8 +20,8 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
 //    // 사용자별 거래 내역 조회
 //    Page<Transaction> findByUserIdOrderByTransactionDateDescCreatedAtDesc(String userId, Pageable pageable);
 //
-//    // 사용자별 특정 거래 조회
-//    Optional<Transaction> findByIdAndUserId(Long id, String userId);
+    // 사용자별 특정 거래 조회
+    Optional<Transaction> findByIdAndUserId(Long id, Long userId);
 //
 //    // 사용자별 거래 내역 검색
 //    @Query("SELECT t FROM Transaction t WHERE t.userId = :userId AND " +
