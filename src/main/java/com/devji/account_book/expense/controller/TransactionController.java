@@ -61,14 +61,15 @@ public class TransactionController {
 //        return ResponseEntity.ok(transaction);
 //    }
 //
-//    // 거래 목록 조회 (페이징)
-//    @GetMapping
-//    public ResponseEntity<Page<TransactionDto>> getTransactions(
-//            @RequestParam(defaultValue = "0") @Min(0) int page,
-//            @RequestParam(defaultValue = "20") @Min(1) int size) {
-//        Page<TransactionDto> transactions = transactionService.getTransactions(page, size);
-//        return ResponseEntity.ok(transactions);
-//    }
+    // 거래 목록 조회 (페이징)
+    @GetMapping
+    public ResponseEntity<Page<TransactionDto>> getTransactions(
+            @AuthenticationPrincipal PrincipalDetails principalDetails,
+            @RequestParam(defaultValue = "0") @Min(0) int page,
+            @RequestParam(defaultValue = "20") @Min(1) int size) {
+        Page<TransactionDto> transactions = transactionService.getTransactions(principalDetails.getUser().getId(), page, size);
+        return ResponseEntity.ok(transactions);
+    }
 //
 //    // 거래 검색
 //    @GetMapping("/search")

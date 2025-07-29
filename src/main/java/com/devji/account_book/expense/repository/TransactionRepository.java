@@ -17,9 +17,9 @@ import java.util.Optional;
 @Repository
 public interface TransactionRepository extends JpaRepository<Transaction, Long> {
     
-//    // 사용자별 거래 내역 조회
-//    Page<Transaction> findByUserIdOrderByTransactionDateDescCreatedAtDesc(String userId, Pageable pageable);
-//
+    // 사용자별 거래 내역 조회
+    Page<Transaction> findByUserIdOrderByTransactionDateDescCreatedAtDesc(Long userId, Pageable pageable);
+
     // 사용자별 특정 거래 조회
     Optional<Transaction> findByIdAndUserId(Long id, Long userId);
 //

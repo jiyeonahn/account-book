@@ -83,17 +83,16 @@ public class TransactionService {
 //        return convertToDto(transaction);
 //    }
 //
-//    // 거래 목록 조회 (페이징)
-//    @Transactional(readOnly = true)
-//    public Page<TransactionDto> getTransactions(int page, int size) {
-//        String userId = getCurrentUserId();
-//        Pageable pageable = PageRequest.of(page, size);
-//
-//        Page<Transaction> transactions = transactionRepository
-//                .findByUserIdOrderByTransactionDateDescCreatedAtDesc(userId, pageable);
-//
-//        return transactions.map(this::convertToDto);
-//    }
+    // 거래 목록 조회 (페이징)
+    @Transactional(readOnly = true)
+    public Page<TransactionDto> getTransactions(long userId, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+
+        Page<Transaction> transactions = transactionRepository
+                .findByUserIdOrderByTransactionDateDescCreatedAtDesc(userId, pageable);
+
+        return transactions.map(this::convertToDto);
+    }
 //
 //    // 거래 검색
 //    @Transactional(readOnly = true)
