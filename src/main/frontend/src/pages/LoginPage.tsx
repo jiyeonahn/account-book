@@ -1,12 +1,13 @@
-import React, { useState, useCallback, useMemo } from 'react';
-import { DollarSign, Eye, EyeOff, Mail, Lock, User, Phone } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import React, {useState, useCallback, useMemo} from 'react';
+import {DollarSign, Eye, EyeOff, Mail, Lock, User, Phone} from 'lucide-react';
+import {useNavigate} from 'react-router-dom';
+import {userAPI} from '../api/userApi';
 
 interface AuthScreensProps {
     setIsAuthenticated: (auth: boolean) => void;
 }
 
-const AuthScreens: React.FC<AuthScreensProps> = ({ setIsAuthenticated }) => {
+const AuthScreens: React.FC<AuthScreensProps> = ({setIsAuthenticated}) => {
     const navigate = useNavigate();
     const [currentScreen, setCurrentScreen] = useState('login');
     const [showPassword, setShowPassword] = useState(false);
@@ -21,7 +22,7 @@ const AuthScreens: React.FC<AuthScreensProps> = ({ setIsAuthenticated }) => {
     });
 
     const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-        const { name, value } = e.target;
+        const {name, value} = e.target;
         setFormData(prev => ({
             ...prev,
             [name]: value
@@ -36,22 +37,13 @@ const AuthScreens: React.FC<AuthScreensProps> = ({ setIsAuthenticated }) => {
 
         setIsLoading(true);
         try {
-            const response = await fetch('http://localhost:8080/api/auth/login', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    email: formData.email,
-                    password: formData.password
-                })
-            });
+            const response = await userAPI.login({email: formData.email, password: formData.password});
 
             if (response.ok) {
                 console.log('로그인 성공:', response.headers.get("token"));
                 setIsAuthenticated(true);
-                const accessToken:string|null = response.headers.get("token");
-                if(accessToken != null){
+                const accessToken: string | null = response.headers.get("token");
+                if (accessToken != null) {
                     localStorage.setItem("accessToken", accessToken);
                 }
                 navigate("/main")
@@ -85,31 +77,20 @@ const AuthScreens: React.FC<AuthScreensProps> = ({ setIsAuthenticated }) => {
 
         setIsLoading(true);
         try {
-            const response = await fetch('http://localhost:8080/api/auth/signup', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    name: formData.name,
-                    email: formData.email,
-                    phone: formData.phone,
-                    password: formData.password
-                })
-            });
+            const response = await userAPI.signup({
+                name: formData.name,
+                email: formData.email,
+                phone: formData.phone,
+                password: formData.password
+            })
 
-            if (response.ok) {
-                const data = await response.json();
-                console.log('회원가입 성공:', data);
+            console.log(response);
+            if (response) {
                 alert('회원가입이 완료되었습니다. 로그인해주세요.');
                 setCurrentScreen('login');
-            } else {
-                const errorData = await response.json();
-                alert(errorData.message || '회원가입에 실패했습니다.');
             }
         } catch (error) {
-            console.error('회원가입 오류:', error);
-            alert('네트워크 오류가 발생했습니다.');
+            alert('회원가입 오류:'+ error);
         } finally {
             setIsLoading(false);
         }
@@ -133,12 +114,14 @@ const AuthScreens: React.FC<AuthScreensProps> = ({ setIsAuthenticated }) => {
 
     return (
         <div>
-            <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 flex items-center justify-center p-4">
+            <div
+                className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 flex items-center justify-center p-4">
                 <div className="max-w-md w-full space-y-8">
                     <div className="text-center">
                         <div className="flex justify-center items-center space-x-2 mb-4">
-                            <div className={`p-3 rounded-2xl ${currentScreen === 'login' ? 'bg-blue-600' : 'bg-green-600'}`}>
-                                <DollarSign className="h-8 w-8 text-white" />
+                            <div
+                                className={`p-3 rounded-2xl ${currentScreen === 'login' ? 'bg-blue-600' : 'bg-green-600'}`}>
+                                <DollarSign className="h-8 w-8 text-white"/>
                             </div>
                         </div>
                         <h2 className="text-3xl font-bold text-gray-900">
@@ -155,7 +138,8 @@ const AuthScreens: React.FC<AuthScreensProps> = ({ setIsAuthenticated }) => {
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-2">이름</label>
                                     <div className="relative">
-                                        <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+                                        <User
+                                            className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5"/>
                                         <input
                                             type="text"
                                             name="name"
@@ -172,7 +156,8 @@ const AuthScreens: React.FC<AuthScreensProps> = ({ setIsAuthenticated }) => {
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2">이메일</label>
                                 <div className="relative">
-                                    <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+                                    <Mail
+                                        className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5"/>
                                     <input
                                         type="email"
                                         name="email"
@@ -193,7 +178,8 @@ const AuthScreens: React.FC<AuthScreensProps> = ({ setIsAuthenticated }) => {
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-2">전화번호</label>
                                     <div className="relative">
-                                        <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+                                        <Phone
+                                            className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5"/>
                                         <input
                                             type="tel"
                                             name="phone"
@@ -210,7 +196,8 @@ const AuthScreens: React.FC<AuthScreensProps> = ({ setIsAuthenticated }) => {
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2">비밀번호</label>
                                 <div className="relative">
-                                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+                                    <Lock
+                                        className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5"/>
                                     <input
                                         type={showPassword ? "text" : "password"}
                                         name="password"
@@ -229,7 +216,7 @@ const AuthScreens: React.FC<AuthScreensProps> = ({ setIsAuthenticated }) => {
                                         onClick={togglePassword}
                                         className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
                                     >
-                                        {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                                        {showPassword ? <EyeOff className="h-5 w-5"/> : <Eye className="h-5 w-5"/>}
                                     </button>
                                 </div>
                                 {currentScreen === 'signup' && (
@@ -241,7 +228,8 @@ const AuthScreens: React.FC<AuthScreensProps> = ({ setIsAuthenticated }) => {
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-2">비밀번호 확인</label>
                                     <div className="relative">
-                                        <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+                                        <Lock
+                                            className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5"/>
                                         <input
                                             type={showConfirmPassword ? "text" : "password"}
                                             name="confirmPassword"
@@ -256,7 +244,8 @@ const AuthScreens: React.FC<AuthScreensProps> = ({ setIsAuthenticated }) => {
                                             onClick={toggleConfirmPassword}
                                             className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
                                         >
-                                            {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                                            {showConfirmPassword ? <EyeOff className="h-5 w-5"/> :
+                                                <Eye className="h-5 w-5"/>}
                                         </button>
                                     </div>
                                 </div>
@@ -266,7 +255,8 @@ const AuthScreens: React.FC<AuthScreensProps> = ({ setIsAuthenticated }) => {
                         {currentScreen === 'login' && (
                             <div className="flex items-center justify-between">
                                 <label className="flex items-center">
-                                    <input type="checkbox" className="rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
+                                    <input type="checkbox"
+                                           className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"/>
                                     <span className="ml-2 text-sm text-gray-600">로그인 상태 유지</span>
                                 </label>
                                 <button className="text-sm text-blue-600 hover:text-blue-800 font-medium">
@@ -278,13 +268,15 @@ const AuthScreens: React.FC<AuthScreensProps> = ({ setIsAuthenticated }) => {
                         {currentScreen === 'signup' && (
                             <div className="space-y-3">
                                 <label className="flex items-center">
-                                    <input type="checkbox" className="rounded border-gray-300 text-green-600 focus:ring-green-500" />
+                                    <input type="checkbox"
+                                           className="rounded border-gray-300 text-green-600 focus:ring-green-500"/>
                                     <span className="ml-2 text-sm text-gray-700">
                                         <span className="text-green-600 font-medium">[필수]</span> 이용약관에 동의합니다
                                     </span>
                                 </label>
                                 <label className="flex items-center">
-                                    <input type="checkbox" className="rounded border-gray-300 text-green-600 focus:ring-green-500" />
+                                    <input type="checkbox"
+                                           className="rounded border-gray-300 text-green-600 focus:ring-green-500"/>
                                     <span className="ml-2 text-sm text-gray-700">
                                         <span className="text-green-600 font-medium">[필수]</span> 개인정보 처리방침에 동의합니다
                                     </span>
