@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useMemo, memo, useEffect } from 'react';
 import { PlusCircle, TrendingDown, TrendingUp, Calendar, DollarSign, PieChart, BarChart3, Filter, Search, LogOut, User } from 'lucide-react';
 import { transactionAPI, ApiTransaction } from '../api/transactionAPI';
+import { useAuth } from '../contexts/AuthContext';
 
 interface DashboardPageProps {
     setIsAuthenticated: (auth: boolean) => void;
@@ -280,7 +281,8 @@ const TransactionList = memo(({ transactions, searchTerm, setSearchTerm, loading
     </div>
 ));
 
-const ExpenseTracker: React.FC<DashboardPageProps> = ({ setIsAuthenticated }) => {
+const DashboardPage = () => {
+    const { user, logout } = useAuth();
     const [activeTab, setActiveTab] = useState('dashboard');
     const [showAddModal, setShowAddModal] = useState(false);
     const [transactionType, setTransactionType] = useState('expense');
@@ -348,11 +350,6 @@ const ExpenseTracker: React.FC<DashboardPageProps> = ({ setIsAuthenticated }) =>
         );
     }, [transactions, searchTerm]);
 
-    // 이벤트 핸들러들을 useCallback으로 최적화
-    const handleLogout = useCallback(() => {
-        setIsAuthenticated(false);
-    }, [setIsAuthenticated]);
-
     const handleAddTransaction = useCallback(async () => {
         if (!amount || !description || !date) {
             alert('모든 필드를 입력해주세요.');
@@ -416,7 +413,7 @@ const ExpenseTracker: React.FC<DashboardPageProps> = ({ setIsAuthenticated }) =>
                             {/* 사용자 인사말 */}
                             <div className="flex items-center space-x-2 text-gray-700">
                                 <User className="h-4 w-4" />
-                                <span className="text-sm font-medium">사용자님 안녕하세요!</span>
+                                <span className="text-sm font-medium">{user?.name}님 안녕하세요!</span>
                             </div>
 
                             <div className="flex items-center space-x-2 text-sm text-gray-600">
@@ -434,7 +431,7 @@ const ExpenseTracker: React.FC<DashboardPageProps> = ({ setIsAuthenticated }) =>
 
                             {/* 로그아웃 버튼 */}
                             <button
-                                onClick={handleLogout}
+                                onClick={logout}
                                 className="flex items-center space-x-2 bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors"
                             >
                                 <LogOut className="h-4 w-4" />
@@ -508,4 +505,4 @@ const ExpenseTracker: React.FC<DashboardPageProps> = ({ setIsAuthenticated }) =>
     );
 };
 
-export default ExpenseTracker;
+export default DashboardPage;

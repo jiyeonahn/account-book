@@ -2,12 +2,10 @@ import React, {useState, useCallback, useMemo} from 'react';
 import {DollarSign, Eye, EyeOff, Mail, Lock, User, Phone} from 'lucide-react';
 import {useNavigate} from 'react-router-dom';
 import {userAPI} from '../api/userApi';
+import { useAuth } from '../contexts/AuthContext';
 
-interface AuthScreensProps {
-    setIsAuthenticated: (auth: boolean) => void;
-}
-
-const AuthScreens: React.FC<AuthScreensProps> = ({setIsAuthenticated}) => {
+const LoginPage = () => {
+    const { login } = useAuth();
     const navigate = useNavigate();
     const [currentScreen, setCurrentScreen] = useState('login');
     const [showPassword, setShowPassword] = useState(false);
@@ -37,19 +35,19 @@ const AuthScreens: React.FC<AuthScreensProps> = ({setIsAuthenticated}) => {
 
         setIsLoading(true);
         try {
-            const response = await userAPI.login({email: formData.email, password: formData.password});
+            const userData = {
+                email: formData.email,
+                password: formData.password
+            }
+            const response = await userAPI.login(userData);
+            if (response) {
+                console.log('로그인 성공:', response);
+                login(response.user, response.accessToken);
 
-            if (response.ok) {
-                console.log('로그인 성공:', response.headers.get("token"));
-                setIsAuthenticated(true);
-                const accessToken: string | null = response.headers.get("token");
-                if (accessToken != null) {
-                    localStorage.setItem("accessToken", accessToken);
-                }
                 navigate("/main")
             } else {
-                const errorData = await response.json();
-                alert(errorData.message || '로그인에 실패했습니다.');
+                //const errorData = await response.json();
+                //alert(errorData.message || '로그인에 실패했습니다.');
             }
         } catch (error) {
             console.error('로그인 오류:', error);
@@ -57,7 +55,7 @@ const AuthScreens: React.FC<AuthScreensProps> = ({setIsAuthenticated}) => {
         } finally {
             setIsLoading(false);
         }
-    }, [formData.email, formData.password, setIsAuthenticated]);
+    }, [formData.email, formData.password]);
 
     const handleSignup = useCallback(async () => {
         if (!formData.name || !formData.email || !formData.phone || !formData.password || !formData.confirmPassword) {
@@ -357,4 +355,4 @@ const AuthScreens: React.FC<AuthScreensProps> = ({setIsAuthenticated}) => {
     );
 };
 
-export default AuthScreens;
+export default LoginPage;
