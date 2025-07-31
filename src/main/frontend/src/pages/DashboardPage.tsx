@@ -1,8 +1,19 @@
-import React, { useState, useCallback, useMemo, memo } from 'react';
+import React, { useState, useCallback, useMemo, memo, useEffect } from 'react';
 import { PlusCircle, TrendingDown, TrendingUp, Calendar, DollarSign, PieChart, BarChart3, Filter, Search, LogOut, User } from 'lucide-react';
+import { transactionAPI, ApiTransaction } from '../api/transactionAPI';
 
 interface DashboardPageProps {
     setIsAuthenticated: (auth: boolean) => void;
+}
+
+// 프론트엔드에서 사용할 거래 타입 정의
+interface Transaction {
+    id: number;
+    type: 'expense' | 'income';
+    category: string;
+    amount: number;
+    description: string;
+    date: string;
 }
 
 // AddTransactionModal을 별도 컴포넌트로 분리하고 memo로 최적화
@@ -209,10 +220,11 @@ const Dashboard = memo(({ monthlyStats }: { monthlyStats: any }) => (
 ));
 
 // TransactionList 컴포넌트를 memo로 최적화
-const TransactionList = memo(({ transactions, searchTerm, setSearchTerm }: {
-    transactions: any[],
+const TransactionList = memo(({ transactions, searchTerm, setSearchTerm, loading }: {
+    transactions: Transaction[],
     searchTerm: string,
-    setSearchTerm: (term: string) => void
+    setSearchTerm: (term: string) => void,
+    loading: boolean
 }) => (
     <div className="space-y-4">
         {/* 검색 및 필터 */}
@@ -235,24 +247,35 @@ const TransactionList = memo(({ transactions, searchTerm, setSearchTerm }: {
 
         {/* 거래 목록 */}
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-            {transactions.map((transaction) => (
-                <div key={transaction.id} className="flex items-center justify-between p-4 border-b border-gray-100 last:border-b-0 hover:bg-gray-50 transition-colors">
-                    <div className="flex items-center space-x-4">
-                        <div className={`w-3 h-3 rounded-full ${
-                            transaction.type === 'income' ? 'bg-green-500' : 'bg-red-500'
-                        }`}></div>
-                        <div>
-                            <p className="font-medium text-gray-800">{transaction.description}</p>
-                            <p className="text-sm text-gray-500">{transaction.category} • {transaction.date}</p>
+            {loading ? (
+                <div className="p-8 text-center">
+                    <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                    <p className="mt-2 text-gray-500">거래 내역을 불러오는 중...</p>
+                </div>
+            ) : transactions.length === 0 ? (
+                <div className="p-8 text-center text-gray-500">
+                    거래 내역이 없습니다.
+                </div>
+            ) : (
+                transactions.map((transaction) => (
+                    <div key={transaction.id} className="flex items-center justify-between p-4 border-b border-gray-100 last:border-b-0 hover:bg-gray-50 transition-colors">
+                        <div className="flex items-center space-x-4">
+                            <div className={`w-3 h-3 rounded-full ${
+                                transaction.type === 'income' ? 'bg-green-500' : 'bg-red-500'
+                            }`}></div>
+                            <div>
+                                <p className="font-medium text-gray-800">{transaction.description}</p>
+                                <p className="text-sm text-gray-500">{transaction.category} • {transaction.date}</p>
+                            </div>
+                        </div>
+                        <div className={`text-lg font-bold ${
+                            transaction.type === 'income' ? 'text-green-600' : 'text-red-600'
+                        }`}>
+                            {transaction.type === 'income' ? '+' : '-'}₩{transaction.amount.toLocaleString()}
                         </div>
                     </div>
-                    <div className={`text-lg font-bold ${
-                        transaction.type === 'income' ? 'text-green-600' : 'text-red-600'
-                    }`}>
-                        {transaction.type === 'income' ? '+' : '-'}₩{transaction.amount.toLocaleString()}
-                    </div>
-                </div>
-            ))}
+                ))
+            )}
         </div>
     </div>
 ));
@@ -266,20 +289,44 @@ const ExpenseTracker: React.FC<DashboardPageProps> = ({ setIsAuthenticated }) =>
     const [description, setDescription] = useState('');
     const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
     const [searchTerm, setSearchTerm] = useState('');
-
-    // 샘플 데이터
-    const [transactions, setTransactions] = useState([
-        { id: 1, type: 'expense', category: '식비', amount: 15000, description: '점심 식사', date: '2024-01-15' },
-        { id: 2, type: 'income', category: '급여', amount: 3000000, description: '1월 급여', date: '2024-01-01' },
-        { id: 3, type: 'expense', category: '교통비', amount: 5000, description: '지하철', date: '2024-01-14' },
-        { id: 4, type: 'expense', category: '쇼핑', amount: 85000, description: '의류 구매', date: '2024-01-13' },
-    ]);
+    const [transactions, setTransactions] = useState<Transaction[]>([]);
+    const [loading, setLoading] = useState(true);
 
     // categories를 useMemo로 최적화 (변경되지 않는 데이터)
     const categories = useMemo(() => ({
         expense: ['식비', '교통비', '쇼핑', '의료비', '문화생활', '기타'],
         income: ['급여', '부업', '용돈', '기타']
     }), []);
+
+    // API 데이터를 프론트엔드 형식으로 변환하는 함수
+    const transformApiTransaction = (apiTransaction: ApiTransaction): Transaction => ({
+        id: apiTransaction.id,
+        type: apiTransaction.type.toLowerCase() as 'expense' | 'income',
+        category: apiTransaction.category,
+        amount: apiTransaction.amount,
+        description: apiTransaction.description,
+        date: apiTransaction.transactionDate
+    });
+
+    // 거래 내역 조회 함수
+    const fetchTransactions = useCallback(async () => {
+        try {
+            setLoading(true);
+            const response = await transactionAPI.getAll();
+            const transformedTransactions = response.content.map(transformApiTransaction);
+            setTransactions(transformedTransactions);
+        } catch (error) {
+            console.error('거래 내역 조회 중 오류 발생:', error);
+            alert('거래 내역을 불러오는데 실패했습니다.');
+        } finally {
+            setLoading(false);
+        }
+    }, []);
+
+    // 컴포넌트 마운트 시 거래 내역 조회
+    useEffect(() => {
+        fetchTransactions();
+    }, [fetchTransactions]);
 
     // monthlyStats를 useMemo로 최적화
     const monthlyStats = useMemo(() => {
@@ -306,30 +353,45 @@ const ExpenseTracker: React.FC<DashboardPageProps> = ({ setIsAuthenticated }) =>
         setIsAuthenticated(false);
     }, [setIsAuthenticated]);
 
-    const handleAddTransaction = useCallback(() => {
+    const handleAddTransaction = useCallback(async () => {
         if (!amount || !description || !date) {
             alert('모든 필드를 입력해주세요.');
             return;
         }
 
-        const newTransaction = {
-            id: Date.now(),
-            type: transactionType,
-            category: category,
-            amount: parseInt(amount),
-            description,
-            date
-        };
+        try {
+            // API 호출을 위한 데이터 준비
+            const transactionData = {
+                type: transactionType.toUpperCase(), // EXPENSE 또는 INCOME
+                category: category,
+                amount: parseInt(amount),
+                description: description,
+                transactionDate: date
+            };
 
-        setTransactions(prev => [newTransaction, ...prev]);
+            // API 호출
+            const response = await transactionAPI.create(transactionData);
 
-        // 폼 초기화
-        setAmount('');
-        setCategory('');
-        setDescription('');
-        setDate(new Date().toISOString().split('T')[0]);
-        setShowAddModal(false);
-    }, [amount, description, date, transactionType, category]);
+            if (!response) {
+                throw new Error('거래 추가에 실패했습니다.');
+            }
+
+            // 폼 초기화
+            setAmount('');
+            setCategory('');
+            setDescription('');
+            setDate(new Date().toISOString().split('T')[0]);
+            setShowAddModal(false);
+
+            // 거래 내역 다시 조회하여 최신 데이터 반영
+            await fetchTransactions();
+
+            alert('거래가 성공적으로 추가되었습니다.');
+        } catch (error) {
+            console.error('거래 추가 중 오류 발생:', error);
+            alert('거래 추가에 실패했습니다. 다시 시도해주세요.');
+        }
+    }, [amount, description, date, transactionType, category, fetchTransactions]);
 
     const handleShowAddModal = useCallback(() => {
         setShowAddModal(true);
@@ -359,7 +421,7 @@ const ExpenseTracker: React.FC<DashboardPageProps> = ({ setIsAuthenticated }) =>
 
                             <div className="flex items-center space-x-2 text-sm text-gray-600">
                                 <Calendar className="h-4 w-4" />
-                                <span>2024년 1월</span>
+                                <span>2025년 7월</span>
                             </div>
 
                             <button
@@ -420,6 +482,7 @@ const ExpenseTracker: React.FC<DashboardPageProps> = ({ setIsAuthenticated }) =>
                         transactions={filteredTransactions}
                         searchTerm={searchTerm}
                         setSearchTerm={setSearchTerm}
+                        loading={loading}
                     />
                 )}
             </main>
