@@ -43,7 +43,7 @@ const LoginPage = () => {
             const response = await userAPI.login(userData);
 
             console.log('로그인 성공:', response);
-            login(response.user, response.accessToken);
+            login(response.user);
             navigate("/main");
 
         } catch (error) {

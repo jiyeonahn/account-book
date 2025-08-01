@@ -10,7 +10,7 @@ interface User {
 interface AuthContextType {
     user: User | null;
     isAuthenticated: boolean;
-    login: (userData: User, token: string) => void;
+    login: (userData: User) => void;
     logout: () => void;
 }
 
@@ -21,26 +21,22 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
 
     useEffect(() => {
-        const token = localStorage.getItem('accessToken');
         const userData = localStorage.getItem('userData');
 
-        console.log(token);
         console.log(userData);
-        if (token && userData) {
+        if (userData) {
             setUser(JSON.parse(userData));
             setIsAuthenticated(true);
         }
     }, []);
 
-    const login = (userData: User, token: string) => {
-        localStorage.setItem('accessToken', token);
+    const login = (userData: User) => {
         localStorage.setItem('userData', JSON.stringify(userData));
         setUser(userData);
         setIsAuthenticated(true);
     };
 
     const logout = () => {
-        localStorage.removeItem('accessToken');
         localStorage.removeItem('userData');
         setUser(null);
         setIsAuthenticated(false);

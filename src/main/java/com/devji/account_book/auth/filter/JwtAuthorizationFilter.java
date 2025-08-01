@@ -28,13 +28,10 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter { // 요청에 
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
 
-        final String authorizationHeader = request.getHeader("Authorization");
-
+        String jwt = jwtUtil.getAccessTokenFromCookie(request);
         String username = null;
-        String jwt = null;
 
-        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
-            jwt = authorizationHeader.substring(7);
+        if (jwt != null) {
             if (jwtUtil.isValidToken(jwt)) {
                 username = jwtUtil.extractUsername(jwt);
             }

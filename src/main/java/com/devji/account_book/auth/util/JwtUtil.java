@@ -26,10 +26,8 @@ public class JwtUtil {
     public static final String AUTHORIZATION_HEADER = "Authorization";
     // 사용자 권한 값의 KEY
     public static final String AUTHORIZATION_KEY = "auth";
-    // Token 식별자
-    public static final String BEARER_PREFIX = "Bearer ";
     // Refresh Token Cookie Name
-    public static final String REFRESH_TOKEN_COOKIE_NAME = "RefreshToken";
+    public static final String ACCESS_TOKEN_COOKIE_NAME = "AccessToken";
 
     // Access Token 만료시간 (5분)
     private static final long ACCESS_TOKEN_TIME = 5 * 60 * 1000L;
@@ -72,15 +70,15 @@ public class JwtUtil {
                 .compact();
     }
 
-    // Refresh Token을 Cookie에 담기
-    public Cookie addRefreshTokenToCookie(String refreshToken) {
+    // AccessToken을 Cookie에 담기
+    public Cookie addAccessTokenToCookie(String accessToken) {
         try {
-            refreshToken = URLEncoder.encode(refreshToken, "utf-8").replaceAll("\\+", "%20");
-            Cookie refreshTokenCookie = new Cookie(REFRESH_TOKEN_COOKIE_NAME, refreshToken);
+            accessToken = URLEncoder.encode(accessToken, "utf-8").replaceAll("\\+", "%20");
+            Cookie refreshTokenCookie = new Cookie(ACCESS_TOKEN_COOKIE_NAME, accessToken);
             refreshTokenCookie.setHttpOnly(true);
 //            refreshTokenCookie.setSecure(true); // HTTPS에서만 전송
             refreshTokenCookie.setPath("/");
-            refreshTokenCookie.setMaxAge((int) (REFRESH_TOKEN_TIME / 1000));
+            refreshTokenCookie.setMaxAge((int) (ACCESS_TOKEN_TIME / 1000));
             refreshTokenCookie.setAttribute("SameSite", "Strict"); // CSRF 보호
             return refreshTokenCookie;
         } catch (UnsupportedEncodingException e) {
@@ -89,28 +87,18 @@ public class JwtUtil {
         }
     }
 
-    // Cookie에서 Refresh Token 가져오기
-    public String getRefreshTokenFromCookie(HttpServletRequest request) {
+    // Cookie에서 Access Token 가져오기
+    public String getAccessTokenFromCookie(HttpServletRequest request) {
         if (request.getCookies() == null) {
             return null;
         }
 
         for (Cookie cookie : request.getCookies()) {
-            if (REFRESH_TOKEN_COOKIE_NAME.equals(cookie.getName())) {
+            if (ACCESS_TOKEN_COOKIE_NAME.equals(cookie.getName())) {
                 return cookie.getValue();
             }
         }
         return null;
-    }
-
-    // Refresh Token Cookie 삭제
-    public Cookie createExpiredRefreshTokenCookie() {
-        Cookie cookie = new Cookie(REFRESH_TOKEN_COOKIE_NAME, "");
-        cookie.setHttpOnly(true);
-        cookie.setSecure(true);
-        cookie.setPath("/");
-        cookie.setMaxAge(0); // 즉시 만료
-        return cookie;
     }
 
     public String extractUsername(String token) {
@@ -203,15 +191,6 @@ public class JwtUtil {
             log.error("Invalid refresh token: {}", e.getMessage());
             return false;
         }
-    }
-
-    // Header에서 Access Token 가져오기
-    public String getAccessTokenFromHeader(HttpServletRequest request) {
-        String bearerToken = request.getHeader(AUTHORIZATION_HEADER);
-        if (StringUtils.hasText(bearerToken) && bearerToken.startsWith(BEARER_PREFIX)) {
-            return bearerToken.substring(7).trim();
-        }
-        return null;
     }
 
     // 토큰에서 역할 정보 추출

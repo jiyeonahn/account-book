@@ -37,6 +37,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     private final RedisUtil redisUtil;
     private final JwtUtil jwtUtil;
 
+    private static final int ACCESS_TOKEN_TIME = 5 * 60;
     public static final long REFRESH_TOKEN_TIME = 7 * 24 * 60 * 60 * 1000L; // 7일
 
     public JwtAuthenticationFilter(RedisUtil redisUtil, JwtUtil jwtUtil) {
@@ -82,11 +83,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         );
 
         // 4. accessToken을 HttpOnly 쿠키로 전달
-        accessToken = URLEncoder.encode(accessToken, StandardCharsets.UTF_8);
-        Cookie accessTokenCookie = new Cookie("accessToken",accessToken);
-        accessTokenCookie.setHttpOnly(true); //Javascript로 접근 불가능
-//        accessTokenCookie.setSecure(true); //https만 허용, 개발에서는 비활성화
-        accessTokenCookie.setPath("/");
+        Cookie accessTokenCookie =  jwtUtil.addAccessTokenToCookie(accessToken);
         response.addCookie(accessTokenCookie);
 
         // 5. 사용자 정보 JSON 응답
