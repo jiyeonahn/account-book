@@ -38,24 +38,26 @@ const LoginPage = () => {
             const userData = {
                 email: formData.email,
                 password: formData.password
-            }
-            const response = await userAPI.login(userData);
-            if (response) {
-                console.log('로그인 성공:', response);
-                login(response.user, response.accessToken);
+            };
 
-                navigate("/main")
-            } else {
-                //const errorData = await response.json();
-                //alert(errorData.message || '로그인에 실패했습니다.');
-            }
+            const response = await userAPI.login(userData);
+
+            console.log('로그인 성공:', response);
+            login(response.user, response.accessToken);
+            navigate("/main");
+
         } catch (error) {
             console.error('로그인 오류:', error);
-            alert('네트워크 오류가 발생했습니다.');
+
+            if (error instanceof Error) {
+                alert(error.message);
+            } else {
+                alert('로그인에 실패했습니다.');
+            }
         } finally {
             setIsLoading(false);
         }
-    }, [formData.email, formData.password]);
+    }, [formData.email, formData.password, login, navigate]);
 
     const handleSignup = useCallback(async () => {
         if (!formData.name || !formData.email || !formData.phone || !formData.password || !formData.confirmPassword) {
@@ -80,15 +82,20 @@ const LoginPage = () => {
                 email: formData.email,
                 phone: formData.phone,
                 password: formData.password
-            })
+            });
 
             console.log(response);
-            if (response) {
-                alert('회원가입이 완료되었습니다. 로그인해주세요.');
-                setCurrentScreen('login');
-            }
+            alert('회원가입이 완료되었습니다. 로그인해주세요.');
+            setCurrentScreen('login');
+
         } catch (error) {
-            alert('회원가입 오류:'+ error);
+            console.error('회원가입 오류:', error);
+
+            if (error instanceof Error) {
+                alert(`회원가입 오류: ${error.message}`);
+            } else {
+                alert('회원가입에 실패했습니다. 다시 시도해주세요.');
+            }
         } finally {
             setIsLoading(false);
         }

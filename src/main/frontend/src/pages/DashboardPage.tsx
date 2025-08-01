@@ -315,11 +315,19 @@ const DashboardPage = () => {
         try {
             setLoading(true);
             const response = await transactionAPI.getAll();
+
             const transformedTransactions = response.content.map(transformApiTransaction);
             setTransactions(transformedTransactions);
+
         } catch (error) {
             console.error('거래 내역 조회 중 오류 발생:', error);
-            alert('거래 내역을 불러오는데 실패했습니다.');
+
+            // axios 에러 메시지 처리
+            if (error instanceof Error) {
+                alert(error.message);
+            } else {
+                alert('거래 내역을 불러오는데 실패했습니다.');
+            }
         } finally {
             setLoading(false);
         }
@@ -366,12 +374,9 @@ const DashboardPage = () => {
                 transactionDate: date
             };
 
-            // API 호출
+            // API 호출 - axios는 성공 시에만 데이터 반환
             const response = await transactionAPI.create(transactionData);
-
-            if (!response) {
-                throw new Error('거래 추가에 실패했습니다.');
-            }
+            console.log('거래 추가 성공:', response);
 
             // 폼 초기화
             setAmount('');
@@ -384,9 +389,15 @@ const DashboardPage = () => {
             await fetchTransactions();
 
             alert('거래가 성공적으로 추가되었습니다.');
+
         } catch (error) {
             console.error('거래 추가 중 오류 발생:', error);
-            alert('거래 추가에 실패했습니다. 다시 시도해주세요.');
+
+            if (error instanceof Error) {
+                alert(error.message);
+            } else {
+                alert('거래 추가에 실패했습니다. 다시 시도해주세요.');
+            }
         }
     }, [amount, description, date, transactionType, category, fetchTransactions]);
 
