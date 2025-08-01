@@ -5,6 +5,7 @@ import com.devji.account_book.auth.filter.JwtAuthorizationFilter;
 import com.devji.account_book.auth.security.PrincipalDetails;
 import com.devji.account_book.auth.security.PrincipalDetailsService;
 import com.devji.account_book.auth.util.JwtUtil;
+import com.devji.account_book.auth.util.RedisUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -31,6 +32,7 @@ public class SecurityConfig {
     private final PrincipalDetailsService principalDetails;
     private final UrlBasedCorsConfigurationSource urlBasedCorsConfigurationSource;
     private final JwtUtil jwtUtil;
+    private final RedisUtil redisUtil;
     private final AuthenticationConfiguration authenticationConfiguration;
 
     @Bean
@@ -40,7 +42,7 @@ public class SecurityConfig {
 
     @Bean
     public JwtAuthenticationFilter jwtAuthenticationFilter() throws Exception {
-        JwtAuthenticationFilter filter = new JwtAuthenticationFilter(jwtUtil);
+        JwtAuthenticationFilter filter = new JwtAuthenticationFilter(redisUtil, jwtUtil);
         filter.setAuthenticationManager(authenticationManager(authenticationConfiguration));
         filter.setFilterProcessesUrl("/api/auth/login"); // 기본 "/login"에서 로그인 url 변경
         return filter;
