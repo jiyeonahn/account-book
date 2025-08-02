@@ -11,6 +11,7 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
@@ -39,10 +40,11 @@ public class AuthController {
     }
 
     @PostMapping("/refresh")
-    public ResponseEntity<?> refreshToken(HttpServletRequest request, HttpServletResponse response) {
+    public void refreshToken(HttpServletRequest request, HttpServletResponse response)
+            throws UnsupportedEncodingException {
         String accessToken = jwtUtil.getAccessTokenFromCookie(request);
-
-        return authService.refresh(accessToken);
+        Cookie newCookie = authService.refresh(accessToken);
+        response.addCookie(newCookie);
     }
 
 }

@@ -27,10 +27,10 @@ public class JwtUtil {
     // 사용자 권한 값의 KEY
     public static final String AUTHORIZATION_KEY = "auth";
     // Refresh Token Cookie Name
-    public static final String ACCESS_TOKEN_COOKIE_NAME = "AccessToken";
+    public static final String ACCESS_TOKEN_COOKIE_NAME = "accessToken";
 
     // Access Token 만료시간 (5분)
-    private static final long ACCESS_TOKEN_TIME = 1 * 60 * 1000L;//TODO: 시간 수정하기
+    private static final long ACCESS_TOKEN_TIME = 5 * 60 * 1000L;
     // Refresh Token 만료시간 (7일)
     public static final long REFRESH_TOKEN_TIME = 7 * 24 * 60 * 60 * 1000L;
 
@@ -138,11 +138,18 @@ public class JwtUtil {
     }
 
     private Claims extractAllClaims(String token) {
-        return Jwts.parserBuilder()
-                .setSigningKey(getSigningKey())
-                .build()
-                .parseClaimsJws(token)
-                .getBody();
+        Claims claims = null;
+        try{
+            claims = Jwts.parserBuilder()
+                    .setSigningKey(getSigningKey())
+                    .build()
+                    .parseClaimsJws(token)//토큰이 만료되면 검증 포함 파싱은 불가
+                    .getBody();
+        } catch (ExpiredJwtException e) {
+            claims = e.getClaims();
+        }
+
+        return claims;
     }
 
     private Claims extractAllClaimsFromRefreshToken(String token) {
