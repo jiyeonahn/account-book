@@ -37,7 +37,6 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     private final RedisUtil redisUtil;
     private final JwtUtil jwtUtil;
 
-    private static final int ACCESS_TOKEN_TIME = 5 * 60;
     public static final long REFRESH_TOKEN_TIME = 7 * 24 * 60 * 60 * 1000L; // 7일
 
     public JwtAuthenticationFilter(RedisUtil redisUtil, JwtUtil jwtUtil) {

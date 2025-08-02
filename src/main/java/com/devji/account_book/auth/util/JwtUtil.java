@@ -30,7 +30,7 @@ public class JwtUtil {
     public static final String ACCESS_TOKEN_COOKIE_NAME = "AccessToken";
 
     // Access Token 만료시간 (5분)
-    private static final long ACCESS_TOKEN_TIME = 5 * 60 * 1000L;
+    private static final long ACCESS_TOKEN_TIME = 1 * 60 * 1000L;//TODO: 시간 수정하기
     // Refresh Token 만료시간 (7일)
     public static final long REFRESH_TOKEN_TIME = 7 * 24 * 60 * 60 * 1000L;
 
@@ -78,7 +78,7 @@ public class JwtUtil {
             refreshTokenCookie.setHttpOnly(true);
 //            refreshTokenCookie.setSecure(true); // HTTPS에서만 전송
             refreshTokenCookie.setPath("/");
-            refreshTokenCookie.setMaxAge((int) (ACCESS_TOKEN_TIME / 1000));
+            refreshTokenCookie.setMaxAge((int) (REFRESH_TOKEN_TIME / 1000)); // 쿠키유효시간은 리프레시 토큰 유효시간과 같게 유지
             refreshTokenCookie.setAttribute("SameSite", "Strict"); // CSRF 보호
             return refreshTokenCookie;
         } catch (UnsupportedEncodingException e) {
@@ -99,6 +99,16 @@ public class JwtUtil {
             }
         }
         return null;
+    }
+
+    // 쿠키 삭제
+    public Cookie deleteCookie() {
+        Cookie cookie = new Cookie("accessToken", "");
+        cookie.setHttpOnly(true);
+//        cookie.setSecure(true);//https에서만 전송
+        cookie.setPath("/");
+        cookie.setMaxAge(0);
+        return cookie;
     }
 
     public String extractUsername(String token) {
@@ -143,7 +153,7 @@ public class JwtUtil {
                 .getBody();
     }
 
-    private Boolean isTokenExpired(String token) {
+    public Boolean isTokenExpired(String token) {
         return extractExpiration(token).before(new Date());
     }
 
