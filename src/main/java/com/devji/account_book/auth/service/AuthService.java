@@ -91,4 +91,8 @@ public class AuthService {
                 .body(Map.of("error", message));
     }
 
+    public void logout(String accessToken){
+        String email = jwtUtil.extractUsername(accessToken);
+        redisUtil.deleteRefreshToken(email);
+    }
 }

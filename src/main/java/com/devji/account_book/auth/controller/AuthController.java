@@ -47,4 +47,17 @@ public class AuthController {
         response.addCookie(newCookie);
     }
 
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout(HttpServletRequest request, HttpServletResponse response) {
+        String accessToken = jwtUtil.getAccessTokenFromCookie(request);
+
+        //refreshToken 제거
+        authService.logout(accessToken);
+
+        // 쿠키 제거
+        Cookie expiredCookie = jwtUtil.deleteCookie();
+        response.addCookie(expiredCookie);
+        return ResponseEntity.ok().build();
+    }
+
 }
