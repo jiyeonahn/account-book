@@ -31,7 +31,7 @@ class ApiClient {
 
         // 응답 인터셉터 - 401, 403 에러 처리
         this.axiosInstance.interceptors.response.use(
-            (response: AxiosResponse) => {
+            (response: AxiosResponse) => {//응답이 성공적으로 왔을 때
                 return response;
             },
             async (error) => {
@@ -41,7 +41,10 @@ class ApiClient {
                 if (error.response?.status === 401 && !error.config._retry) {
                     error.config._retry = true;
                     try {
+                        // refresh 요청
                         await this.axiosInstance.post('/auth/refresh');
+
+                        // refresh 성공 시, 원래 요청 재시도
                         return this.axiosInstance(error.config);
                     } catch (refreshError) {
                         if (this.onUnauthorized) {

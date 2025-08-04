@@ -2,6 +2,7 @@ import React, { useState, useCallback, useMemo, memo, useEffect } from 'react';
 import { PlusCircle, TrendingDown, TrendingUp, Calendar, DollarSign, PieChart, BarChart3, Filter, Search, LogOut, User } from 'lucide-react';
 import { transactionAPI, ApiTransaction } from '../api/transactionAPI';
 import { useAuth } from '../contexts/AuthContext';
+import {userAPI} from "../api/userApi";
 
 interface DashboardPageProps {
     setIsAuthenticated: (auth: boolean) => void;
@@ -310,6 +311,16 @@ const DashboardPage = () => {
         date: apiTransaction.transactionDate
     });
 
+    // 로그아웃
+    const handleLogout = useCallback(async ()=> {
+        try {
+            await userAPI.logout();
+            logout();
+        } catch (error) {
+            console.error('Logout error:', error);
+        }
+    },[]);
+
     // 거래 내역 조회 함수
     const fetchTransactions = useCallback(async () => {
         try {
@@ -442,7 +453,7 @@ const DashboardPage = () => {
 
                             {/* 로그아웃 버튼 */}
                             <button
-                                onClick={logout}
+                                onClick={handleLogout}
                                 className="flex items-center space-x-2 bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors"
                             >
                                 <LogOut className="h-4 w-4" />

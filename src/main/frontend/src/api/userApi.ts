@@ -14,4 +14,5 @@ export interface UserData extends Credentials {
 export const userAPI = {
     login: (credentials: Credentials) => apiClient.post('/auth/login', credentials),
     signup: (userData: UserData) => apiClient.post('/auth/signup', userData),
+    logout: () => apiClient.post('/auth/logout'),
 };
