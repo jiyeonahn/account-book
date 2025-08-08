@@ -83,14 +83,6 @@ public class AuthService {
         }
     }
 
-    private ResponseEntity<Map<String, String>> unauthorizedWithCookie(String message, HttpServletResponse response)
-            throws UnsupportedEncodingException {
-        Cookie expiresCookie = jwtUtil.deleteCookie();
-        response.addCookie(expiresCookie);
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                .body(Map.of("error", message));
-    }
-
     public void logout(String accessToken){
         String email = jwtUtil.extractUsername(accessToken);
         redisUtil.deleteRefreshToken(email);
