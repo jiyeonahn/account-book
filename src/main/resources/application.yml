@@ -3,7 +3,7 @@ spring:
     name: account-book
   data:
     redis:
-      host: localhost
+      host: redis
       port: 6379
   datasource:
     url: ${DB_URL}
