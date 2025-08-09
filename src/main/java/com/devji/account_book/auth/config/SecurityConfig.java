@@ -71,10 +71,6 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(urlBasedCorsConfigurationSource))
                 .authorizeHttpRequests((authorizeHttpRequests) -> authorizeHttpRequests
                         .requestMatchers("/api/auth/**").permitAll() // API 인증 예외
-                        // React 정적 파일 및 SPA 라우팅을 위한 설정
-                        .requestMatchers("/", "/login", "/main").permitAll() // React 라우트
-                        .requestMatchers("/*.html", "/static/**", "/*.js", "/*.css", "/*.ico", "/*.png", "/*.jpg", "/*.svg").permitAll() // 정적 파일
-                        .requestMatchers("/manifest.json", "/robots.txt", "/favicon.ico").permitAll() // PWA 및 메타 파일
                         .anyRequest().authenticated()
                 );
 

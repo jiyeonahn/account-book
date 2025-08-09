@@ -98,14 +98,6 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
         String path = request.getRequestURI();
 
-        return path.startsWith("/api/auth/") ||
-                path.equals("/") ||
-                path.startsWith("/static/") ||
-                path.endsWith(".html") ||
-                path.endsWith(".css") ||
-                path.endsWith(".js") ||
-                path.endsWith(".ico") ||
-                path.startsWith("/main") ||  // React 라우팅 경로
-                path.startsWith("/login");
+        return path.startsWith("/api/auth/");
     }
 }
